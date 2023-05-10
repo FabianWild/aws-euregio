@@ -40,6 +40,34 @@ async function showStations(url) {
     let jsondata = await response.json();
 
     // Wetterstationen mit Icons und Popups implementieren
+    L.geoJSON(jsondata)//addTo(themaLayer.stops)
+    //console.log(response, jsondata)
+    L.geoJSON(jsondata, {
+        pointToLayer: function(feature, latlng) {
+             return L.marker(latlng, {
+                 icon: L.icon({
+                     iconUrl: "icons/wifi.png",
+                     iconAnchor: [16, 37],
+                     popupAnchor: [0, -37],
+                 })
+             });
+         },
+        onEachFeature: function(feature, layer){
+            let prop = feature.properties;
+            let geom = feature.geometry;
+            layer.bindPopup(`
+            <h4>Station: ${prop.name}, Seehöhe: ${geom.coordinates[2]}m ü. NN</h4>
+            <ul>
+                <li>Lufttemperatur in °C: ${prop.LT || "nicht gemessen"}</li>
+                <li>Relative Luftfeuchte in %: ${prop.RH || "nicht gemessen"}</li>
+                <li>Windgeschwindigkeit in km/h: ${prop.WG || "nicht gemessen"}</li>
+                <li>Schneehöhe in cm: ${prop.HS || "nicht gemessen"}</li>
+            </ul>
+            
+            `);
+            //console.log(feature.properties, prop.LINE_NAME);
+        }
+    }).addTo(themaLayer.stations);
 
 }
 showStations("https://static.avalanche.report/weather_stations/stations.geojson");
