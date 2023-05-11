@@ -8,12 +8,14 @@ let ibk = {
 
 // Karte initialisieren
 let map = L.map("map", {
-    fullscreenControl: true
+    fullscreenControl: true,
+    maxZoom: 12
 }).setView([ibk.lat, ibk.lng], 11);
 
 // thematische Layer
 let themaLayer = {
-    stations: L.featureGroup()
+    stations: L.featureGroup(),
+    temperature: L.featureGroup(),
 }
 
 // Hintergrundlayer
@@ -26,7 +28,8 @@ let layerControl = L.control.layers({
     "Esri WorldTopoMap": L.tileLayer.provider("Esri.WorldTopoMap"),
     "Esri WorldImagery": L.tileLayer.provider("Esri.WorldImagery")
 }, {
-    "Wetterstationen": themaLayer.stations.addTo(map)
+    "Wetterstationen": themaLayer.stations.addTo(map),
+    "Temperatur": themaLayer.temperature.addTo(map),
 }).addTo(map);
 
 // Maßstab
@@ -34,11 +37,7 @@ L.control.scale({
     imperial: false,
 }).addTo(map);
 
-// Vienna Sightseeing Haltestellen
-async function showStations(url) {
-    let response = await fetch(url);
-    let jsondata = await response.json();
-
+function writeStationLayer(jsondata){
     // Wetterstationen mit Icons und Popups implementieren
     L.geoJSON(jsondata)//addTo(themaLayer.stops)
     //console.log(response, jsondata)
@@ -55,19 +54,28 @@ async function showStations(url) {
         onEachFeature: function(feature, layer){
             let prop = feature.properties;
             let geom = feature.geometry;
+            let pointInTime = new Date(prop.date);
+        
+        
             layer.bindPopup(`
             <h4>Station: ${prop.name}, Seehöhe: ${geom.coordinates[2]}m ü. NN</h4>
             <ul>
                 <li>Lufttemperatur in °C: ${prop.LT || "nicht gemessen"}</li>
                 <li>Relative Luftfeuchte in %: ${prop.RH || "nicht gemessen"}</li>
-                <li>Windgeschwindigkeit in km/h: ${prop.WG || "nicht gemessen"}</li>
+                <li>Windgeschwindigkeit in km/h: ${prop.WG ? (prop.WG * 3.6).toFixed(1) : "-"}</li>
                 <li>Schneehöhe in cm: ${prop.HS || "nicht gemessen"}</li>
             </ul>
-            
+            <span>Datum, Uhrzeit: ${pointInTime.toLocaleString()}</span>
             `);
-            //console.log(feature.properties, prop.LINE_NAME);
+        
         }
     }).addTo(themaLayer.stations);
+}
+// Vienna Sightseeing Haltestellen
+async function loadStations(url) {
+    let response = await fetch(url);
+    let jsondata = await response.json();
+    writeStationLayer(jsondata);
 
 }
-showStations("https://static.avalanche.report/weather_stations/stations.geojson");
+loadStations("https://static.avalanche.report/weather_stations/stations.geojson");
