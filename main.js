@@ -39,9 +39,15 @@ L.control.scale({
 }).addTo(map);
 
 function getColor(value, ramp){
-    
+    for (let rule of ramp){
+        if (value >= rule.min && value < rule.max){
+            return rule.color;
+        }
+    }
 
 }
+
+
 function writeStationLayer(jsondata){
     // Wetterstationen mit Icons und Popups implementieren
     L.geoJSON(jsondata)//addTo(themaLayer.stops)
@@ -67,7 +73,7 @@ function writeStationLayer(jsondata){
             <ul>
                 <li>Lufttemperatur in °C: ${prop.LT || "nicht gemessen"}</li>
                 <li>Relative Luftfeuchte in %: ${prop.RH || "nicht gemessen"}</li>
-                <li>Windgeschwindigkeit in km/h: ${prop.WG ? (prop.WG * 3.6).toFixed(1) : "-"}</li>
+                <li>Windgeschwindigkeit in km/h: ${prop.WG ? (prop.WG * 3.6).toFixed(1) : "nicht gemessen"}</li>
                 <li>Schneehöhe in cm: ${prop.HS || "nicht gemessen"}</li>
             </ul>
             <span>Datum, Uhrzeit: ${pointInTime.toLocaleString()}</span>
@@ -85,10 +91,11 @@ function writeTemperatureLayer(jsondata){
             }
         },
         pointToLayer: function(feature, latlng) {
+            let color = getColor(feature.properties.LT, COLORS.temperature);
             return L.marker(latlng, {
                 icon: L.divIcon({
                     className: "aws-div-icon",
-                    html: `<span>${feature.properties.LT.toFixed(1)}</span>`
+                    html: `<span style="background-color: ${color}">${feature.properties.LT.toFixed(1)}</span>`
                 })
             });
         },
