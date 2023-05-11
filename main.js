@@ -76,7 +76,7 @@ function writeStationLayer(jsondata){
             <ul>
                 <li>Lufttemperatur in °C: ${prop.LT || "nicht gemessen"}</li>
                 <li>Relative Luftfeuchte in %: ${prop.RH || "nicht gemessen"}</li>
-                <li>Windgeschwindigkeit in km/h: ${prop.WG ? (prop.WG * 3.6).toFixed(1) : "nicht gemessen"}</li>
+                <li>Windgeschwindigkeit in km/h: ${prop.WG ? (prop.WG).toFixed(1) : "nicht gemessen"}</li>
                 <li>Schneehöhe in cm: ${prop.HS || "nicht gemessen"}</li>
             </ul>
             <span>Datum, Uhrzeit: ${pointInTime.toLocaleString()}</span>
@@ -115,11 +115,11 @@ function writeWindLayer(jsondata){
             }
         },
         pointToLayer: function(feature, latlng) {
-            let color = getColor((feature.properties.WG*3.6), COLORS.wind);
+            let color = getColor((feature.properties.WG), COLORS.wind);
             return L.marker(latlng, {
                 icon: L.divIcon({
                     className: "aws-div-icon",
-                    html: `<span style="background-color: ${color}">${(feature.properties.WG * 3.6).toFixed(1)}</span>`
+                    html: `<span style="background-color: ${color}">${(feature.properties.WG).toFixed(1)}</span>`
                 })
             });
         },
