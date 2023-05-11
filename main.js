@@ -28,15 +28,20 @@ let layerControl = L.control.layers({
     "Esri WorldTopoMap": L.tileLayer.provider("Esri.WorldTopoMap"),
     "Esri WorldImagery": L.tileLayer.provider("Esri.WorldImagery")
 }, {
-    "Wetterstationen": themaLayer.stations.addTo(map),
+    "Wetterstationen": themaLayer.stations,//.addTo(map),
     "Temperatur": themaLayer.temperature.addTo(map),
 }).addTo(map);
+layerControl.expand();
 
 // Maßstab
 L.control.scale({
     imperial: false,
 }).addTo(map);
 
+function getColor(value, ramp){
+    
+
+}
 function writeStationLayer(jsondata){
     // Wetterstationen mit Icons und Popups implementieren
     L.geoJSON(jsondata)//addTo(themaLayer.stops)
@@ -71,11 +76,32 @@ function writeStationLayer(jsondata){
         }
     }).addTo(themaLayer.stations);
 }
+
+function writeTemperatureLayer(jsondata){
+    L.geoJSON(jsondata, {
+        filter: function(feature){
+            if (feature.properties.LT > -50 && feature.properties.LT < 50){
+                return true;
+            }
+        },
+        pointToLayer: function(feature, latlng) {
+            return L.marker(latlng, {
+                icon: L.divIcon({
+                    className: "aws-div-icon",
+                    html: `<span>${feature.properties.LT.toFixed(1)}</span>`
+                })
+            });
+        },
+
+    }).addTo(themaLayer.temperature);
+
+}
 // Vienna Sightseeing Haltestellen
 async function loadStations(url) {
     let response = await fetch(url);
     let jsondata = await response.json();
     writeStationLayer(jsondata);
+    writeTemperatureLayer(jsondata);
 
 }
 loadStations("https://static.avalanche.report/weather_stations/stations.geojson");
