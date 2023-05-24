@@ -137,7 +137,7 @@ function writeSnowLayer(jsondata){
             }
         },
         pointToLayer: function(feature, latlng) {
-            let color = getColor((feature.properties.WG), COLORS.snow);
+            let color = getColor((feature.properties.HS), COLORS.snow);
             return L.marker(latlng, {
                 icon: L.divIcon({
                     className: "aws-div-icon",
