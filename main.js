@@ -155,6 +155,7 @@ async function loadStations(url) {
     writeStationLayer(jsondata);
     writeTemperatureLayer(jsondata);
     writeWindLayer(jsondata);
+    writeSnowLayer(jsondata);
 
 }
 loadStations("https://static.avalanche.report/weather_stations/stations.geojson");
